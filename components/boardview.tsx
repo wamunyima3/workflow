@@ -492,6 +492,7 @@ export function BoardView() {
                             draggable
                             onDragStart={(e) => handleDragStart(e, task.id)}
                             className="cursor-move"
+                            onClick={() => selectTask(task.id)}
                           >
                             <TaskCard
                               task={task}

@@ -63,6 +63,7 @@ export function TaskDetailDialog() {
     updateTask,
     currentUser,
     deleteTask,
+    moveTaskToStage,
   } = useStore();
 
   const task = tasks.find((t) => t.id === selectedTaskId);
@@ -92,6 +93,9 @@ export function TaskDetailDialog() {
   const statusInfo = TASK_STATUSES.find((s) => s.value === task.status);
   const canDelete = currentUser?.role === "overseer";
   const overseer = currentUser?.role === "overseer";
+
+  const board = boards.find((b) => b.id === task.boardId);
+  const currentStage = board?.stages.find((s) => s.id === task.status);
 
   const handleDelete = () => {
     deleteTask(task.id);
@@ -473,7 +477,9 @@ export function TaskDetailDialog() {
                                 <div className="flex items-start justify-between gap-3">
                                   <div className="flex-1 grid grid-cols-2 gap-3">
                                     <Input
-                                      ref={(el) => {fieldRefs.current[index] = el;}}
+                                      ref={(el) => {
+                                        fieldRefs.current[index] = el;
+                                      }}
                                       placeholder="Field label"
                                       value={field.label}
                                       onChange={(e) =>
@@ -763,6 +769,38 @@ export function TaskDetailDialog() {
                                 );
                               })()}
                             </div>
+                          </div>
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="font-medium">Current Stage</span>
+                            {overseer ? (
+                              <Select
+                                value={task.status}
+                                onValueChange={(stageId) =>
+                                  moveTaskToStage(task.id, stageId)
+                                }
+                              >
+                                <SelectTrigger className="h-7 w-[180px] bg-card">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {board?.stages.map((stage) => (
+                                    <SelectItem key={stage.id} value={stage.id}>
+                                      {stage.name}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            ) : (
+                              <Badge
+                                variant="outline"
+                                className={cn(
+                                  "text-[10px] font-bold",
+                                  currentStage?.color
+                                )}
+                              >
+                                {currentStage?.name}
+                              </Badge>
+                            )}
                           </div>
                         </div>
                       </div>
