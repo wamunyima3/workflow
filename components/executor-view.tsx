@@ -29,7 +29,7 @@ export function ExecutorView() {
     currentUser,
     boards,
     moveTaskToStage,
-    markFormComplete,
+    toggleFormComplete,
   } = useStore();
   const [createTaskOpen, setCreateTaskOpen] = useState(false);
 

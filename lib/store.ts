@@ -81,7 +81,7 @@ interface AppActions {
   // Filter persistence
   setAssigneeFilter: (boardId: string, filter: string) => void;
 
-  markFormComplete: (taskId: string) => void;
+  toggleFormComplete: (taskId: string) => void;
   deleteTask: (taskId: string) => void;
 }
 
@@ -509,7 +509,7 @@ export const useStore = create<Store>()(
         }));
       },
 
-      markFormComplete: (taskId) => {
+      toggleFormComplete: (taskId) => {
         const state = get();
         if (!state.currentUser) return;
 
@@ -517,11 +517,13 @@ export const useStore = create<Store>()(
           const task = state.tasks.find((t) => t.id === taskId);
           if (!task) return state;
 
+          const newValue = !task.isFormComplete;
+
           const changes = [
             {
               field: "isFormComplete",
               oldValue: task.isFormComplete || false,
-              newValue: true,
+              newValue: newValue,
             },
           ];
 
@@ -532,17 +534,17 @@ export const useStore = create<Store>()(
               const newEditHistory = [...t.editHistory];
               if (state.currentUser) {
                 newEditHistory.push(
-                  createEditHistoryEntry(
-                    state.currentUser.id,
-                    state.currentUser.name,
-                    changes
-                  )
+                    createEditHistoryEntry(
+                        state.currentUser.id,
+                        state.currentUser.name,
+                        changes
+                    )
                 );
               }
 
               return {
                 ...t,
-                isFormComplete: true,
+                isFormComplete: newValue,
                 editHistory: newEditHistory,
                 updatedAt: new Date().toISOString(),
               };
