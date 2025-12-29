@@ -103,17 +103,49 @@ export function CreateBoardDialog({ open, onOpenChange }: CreateBoardDialogProps
                     onChange={(e) => updateStage(index, "name", e.target.value)}
                     required
                   />
-                  <select
-                    value={stage.color}
-                    onChange={(e) => updateStage(index, "color", e.target.value)}
-                    className="px-3 py-2 border rounded-md text-sm"
-                  >
-                    {DEFAULT_STAGE_COLORS.map((color, i) => (
-                      <option key={i} value={color}>
-                        Color {i + 1}
-                      </option>
-                    ))}
-                  </select>
+                  <div className="relative inline-flex items-center">
+                    <div
+                        className="absolute left-3 w-3 h-3 rounded-full pointer-events-none"
+                        style={{
+                          backgroundColor: stage.color.includes('slate') ? '#94a3b8' :
+                              stage.color.includes('blue') ? '#3b82f6' :
+                                  stage.color.includes('purple') ? '#a855f7' :
+                                      stage.color.includes('orange') ? '#fb923c' :
+                                          stage.color.includes('green') ? '#10b981' : '#94a3b8'
+                        }}
+                    />
+                    <select
+                        value={stage.color}
+                        onChange={(e) => updateStage(index, "color", e.target.value)}
+                        className="pl-8 pr-3 py-2 border rounded-md text-sm w-32"
+                    >
+                      {DEFAULT_STAGE_COLORS.map((color, i) => (
+                          <option
+                              key={i}
+                              value={color}
+                              style={{
+                                paddingLeft: '24px',
+                                backgroundImage: `radial-gradient(circle, ${
+                                    color.includes('slate') ? '#94a3b8' :
+                                        color.includes('blue') ? '#3b82f6' :
+                                            color.includes('purple') ? '#a855f7' :
+                                                color.includes('orange') ? '#fb923c' :
+                                                    color.includes('green') ? '#10b981' : '#94a3b8'
+                                } 40%, transparent 40%)`,
+                                backgroundSize: '12px 12px',
+                                backgroundPosition: '6px center',
+                                backgroundRepeat: 'no-repeat'
+                              }}
+                          >
+                            {color.includes('slate') ? 'Gray' :
+                                color.includes('blue') ? 'Blue' :
+                                    color.includes('purple') ? 'Purple' :
+                                        color.includes('orange') ? 'Orange' :
+                                            color.includes('green') ? 'Green' : `Color ${i + 1}`}
+                          </option>
+                      ))}
+                    </select>
+                  </div>
                   {stages.length > 2 && (
                     <Button type="button" variant="ghost" size="icon" onClick={() => removeStage(index)}>
                       <X size={16} />
