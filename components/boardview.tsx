@@ -398,7 +398,7 @@ export function BoardView() {
                           size="sm"
                           className="gap-1.5 sm:gap-2 text-xs sm:text-sm text-muted-foreground border-border bg-transparent transition-colors hover:bg-destructive/10 hover:text-destructive hover:border-destructive/20 flex-1 sm:flex-none"
                         >
-                          <Trash2 size={14} className="shrink-0" />
+                          <Trash2 size={14} className="shrink-0 text-destructive" />
                           <span className="hidden sm:inline">Delete Board</span>
                           <span className="sm:hidden">Delete</span>
                         </Button>

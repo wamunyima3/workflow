@@ -337,7 +337,7 @@ export function TaskDetailDialog() {
                     size="icon"
                     className="rounded-full text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                   >
-                    <Trash2 size={18} />
+                    <Trash2 size={18} className="text-destructive" />
                   </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
@@ -515,7 +515,7 @@ export function TaskDetailDialog() {
                                     onClick={() => removeFormField(index)}
                                     className="text-red-500 hover:text-red-700 hover:bg-red-50"
                                   >
-                                    <Trash2 size={16} />
+                                    <Trash2 size={16} className="text-destructive" />
                                   </Button>
                                 </div>
 

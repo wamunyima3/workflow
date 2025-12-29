@@ -321,7 +321,7 @@ export function CreateTaskDialog({
                         onClick={() => removeFormField(index)}
                         className="text-red-500 hover:text-red-700 hover:bg-red-50"
                       >
-                        <Trash2 size={16} />
+                        <Trash2 size={16} className="text-destructive" />
                       </Button>
                     </div>
 
