@@ -21,6 +21,7 @@ export default function App() {
     addTeamMemberToBoard,
     viewMode,
     selectedBoardId,
+    createTask,
   } = useStore();
   const [isInitialized, setIsInitialized] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -91,6 +92,140 @@ export default function App() {
 
       // Ensure all existing users are members of the initial board
       users.forEach((u) => addTeamMemberToBoard(newBoard.id, u.id));
+
+      // Ensure all existing users are members of the initial board
+      users.forEach((u) => addTeamMemberToBoard(newBoard.id, u.id));
+
+      // Create a demo census data collection task
+      if (currentUser) {
+        createTask({
+          title: "National Census Data Collection - District 7",
+          description: "Collect household census data for District 7, Zone A. Ensure all required fields are completed accurately and verified before submission.",
+          type: "data-collection",
+          priority: "high",
+          boardId: newBoard.id,
+          // assignedTo: currentUser.id,
+          dataCollectionFields: [
+            {
+              id: "household-id",
+              label: "Household ID",
+              type: "text",
+              required: true,
+              placeholder: "e.g., D7-ZA-001",
+              helpText: "Unique identifier for this household",
+            },
+            {
+              id: "head-of-household",
+              label: "Head of Household Name",
+              type: "text",
+              required: true,
+              placeholder: "Full name",
+              helpText: "Legal name of the household head",
+            },
+            {
+              id: "household-size",
+              label: "Number of Household Members",
+              type: "number",
+              required: true,
+              placeholder: "0",
+              helpText: "Total number of people living in this household",
+            },
+            {
+              id: "dwelling-type",
+              label: "Type of Dwelling",
+              type: "select",
+              required: true,
+              options: [
+                "Single Family House",
+                "Apartment",
+                "Townhouse",
+                "Mobile Home",
+                "Other",
+              ],
+              helpText: "Select the type of dwelling",
+            },
+            {
+              id: "electricity-access",
+              label: "Access to Electricity",
+              type: "select",
+              required: true,
+              options: ["Yes - Grid", "Yes - Solar", "Yes - Generator", "No"],
+              helpText: "Primary source of electricity",
+            },
+            {
+              id: "water-source",
+              label: "Primary Water Source",
+              type: "select",
+              required: true,
+              options: [
+                "Piped into dwelling",
+                "Public tap",
+                "Borehole",
+                "Well",
+                "River/Stream",
+                "Other",
+              ],
+              helpText: "Main source of drinking water",
+            },
+            {
+              id: "monthly-income",
+              label: "Estimated Monthly Household Income (ZMW)",
+              type: "select",
+              required: false,
+              options: [
+                "Below 1,000",
+                "1,000 - 3,000",
+                "3,000 - 5,000",
+                "5,000 - 10,000",
+                "Above 10,000",
+              ],
+              helpText: "Approximate total household income",
+            },
+            {
+              id: "children-under-5",
+              label: "Number of Children Under 5",
+              type: "number",
+              required: true,
+              placeholder: "0",
+              helpText: "Children under 5 years of age in household",
+            },
+            {
+              id: "school-age-children",
+              label: "Number of School-Age Children (5-18)",
+              type: "number",
+              required: true,
+              placeholder: "0",
+              helpText: "Children between 5 and 18 years old",
+            },
+            {
+              id: "contact-number",
+              label: "Contact Phone Number",
+              type: "text",
+              required: false,
+              placeholder: "+260...",
+              helpText: "Optional contact number for follow-up",
+            },
+            {
+              id: "gps-coordinates",
+              label: "GPS Coordinates",
+              type: "text",
+              required: false,
+              placeholder: "Latitude, Longitude",
+              helpText: "Location coordinates if available",
+            },
+            {
+              id: "additional-notes",
+              label: "Additional Notes",
+              type: "textarea",
+              required: false,
+              placeholder: "Any additional observations or notes...",
+              helpText: "Special circumstances or observations about this household",
+            },
+          ],
+          status: `${newBoard.stages.at(0)}`,
+          createdBy: currentUser.id
+        });
+      }
     }
   }, [
     isInitialized,
@@ -99,6 +234,7 @@ export default function App() {
     createBoard,
     users,
     addTeamMemberToBoard,
+    createTask,
   ]);
 
   // Show loading state while hydrating
