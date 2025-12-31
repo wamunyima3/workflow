@@ -222,7 +222,7 @@ export default function App() {
               helpText: "Special circumstances or observations about this household",
             },
           ],
-          status: `${newBoard.stages.at(0)}`,
+          status: newBoard.stages[0].id,
           createdBy: currentUser.id
         });
       }

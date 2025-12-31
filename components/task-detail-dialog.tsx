@@ -712,9 +712,52 @@ export function TaskDetailDialog() {
                           </div>
                           <div className="flex items-center justify-between text-xs">
                             <span className="font-medium">Type</span>
-                            <span className="text-slate-900 font-bold uppercase">
-                              {task.type.replace("-", " ")}
-                            </span>
+                            {overseer ? (
+                              <Select
+                                value={task.type}
+                                onValueChange={(val) => {
+                                  const newType = val as "standard" | "data-collection";
+                                  updateTask(task.id, {
+                                    type: newType,
+                                    // Initialize fields if switching to data-collection and none exist
+                                    ...(newType === "data-collection" &&
+                                    !task.dataCollectionFields
+                                      ? { dataCollectionFields: [] }
+                                      : {}),
+                                  });
+                                }}
+                              >
+                                <SelectTrigger className="h-6 w-auto min-w-[120px] px-2 text-xs font-bold uppercase border-none bg-transparent hover:bg-slate-200">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="standard" className="text-xs">
+                                    <div className="flex items-center gap-2">
+                                      <FileText size={12} />
+                                      <span>STANDARD</span>
+                                    </div>
+                                  </SelectItem>
+                                  <SelectItem
+                                    value="data-collection"
+                                    className="text-xs"
+                                  >
+                                    <div className="flex items-center gap-2">
+                                      <FileSpreadsheet size={12} />
+                                      <span>DATA COLLECTION</span>
+                                    </div>
+                                  </SelectItem>
+                                </SelectContent>
+                              </Select>
+                            ) : (
+                              <span className="text-slate-900 font-bold uppercase flex items-center gap-2">
+                                {task.type === "standard" ? (
+                                  <FileText size={12} />
+                                ) : (
+                                  <FileSpreadsheet size={12} />
+                                )}
+                                {task.type.replace("-", " ")}
+                              </span>
+                            )}
                           </div>
                           <div className="flex items-center justify-between text-xs">
                             <span className="font-medium">Assigned To</span>
