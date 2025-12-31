@@ -264,7 +264,7 @@ export const useStore = create<Store>()(
           editHistory: [],
           helpRequests: [],
           boardId: boardId,
-          status: initialStageId,
+          status: taskData.status || initialStageId,
           isFormComplete: false,
         };
 

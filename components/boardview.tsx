@@ -45,6 +45,22 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import { FileText, FileSpreadsheet, User as UserIcon } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import type { TaskType } from "@/lib/types";
 
 export function BoardView() {
   const {
@@ -58,11 +74,18 @@ export function BoardView() {
     setAssigneeFilter,
     currentUser,
     deleteBoard,
+    createTask,
   } = useStore();
 
   const [createTaskOpen, setCreateTaskOpen] = useState(false);
   const [manageStagesOpen, setManageStagesOpen] = useState(false);
   const [addMembersOpen, setAddMembersOpen] = useState(false);
+
+  // Inline creation states
+  const [creatingInStage, setCreatingInStage] = useState<string | null>(null);
+  const [newTaskTitle, setNewTaskTitle] = useState("");
+  const [newTaskType, setNewTaskType] = useState<TaskType>("standard");
+  const [newTaskAssignee, setNewTaskAssignee] = useState<string>("");
 
   // Editing states for board
   const [editingBoardName, setEditingBoardName] = useState(false);
@@ -144,6 +167,26 @@ export function BoardView() {
   const cancelBoardDescEdit = () => {
     setEditingBoardDesc(false);
     setBoardDescValue("");
+  };
+
+  const handleCreateInlineTask = (stageId: string) => {
+    if (!newTaskTitle.trim() || !selectedBoardId) return;
+
+    createTask({
+      title: newTaskTitle.trim(),
+      description: "",
+      priority: "medium",
+      status: stageId,
+      boardId: selectedBoardId,
+      type: newTaskType,
+      assignedTo: newTaskAssignee || undefined,
+      createdBy: currentUser?.id || "",
+    });
+
+    setNewTaskTitle("");
+    setNewTaskType("standard");
+    setNewTaskAssignee("");
+    // Keep focus for rapid entry
   };
 
   if (!selectedBoard) {
@@ -502,10 +545,235 @@ export function BoardView() {
                         </motion.div>
                       ))}
 
-                      {stageTasks.length === 0 && (
+                      {stageTasks.length === 0 && !creatingInStage && (
                         <div className="border-2 border-dashed border-border/50 rounded-xl h-32 flex items-center justify-center text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest">
                           Drop tasks here
                         </div>
+                      )}
+
+                      {/* Inline Creation Form */}
+                      {/* Inline Creation Form */}
+                      {creatingInStage === stage.id ? (
+                        <div className="bg-card p-3 rounded-xl border border-primary shadow-sm space-y-3 animate-in fade-in zoom-in-95 duration-200">
+                          <Textarea
+                            placeholder="What needs to be done?"
+                            className="resize-none min-h-[60px] text-sm bg-background/50 focus:bg-background transition-colors"
+                            value={newTaskTitle}
+                            onChange={(e) => setNewTaskTitle(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter" && !e.shiftKey) {
+                                e.preventDefault();
+                                handleCreateInlineTask(stage.id);
+                              }
+                              if (e.key === "Escape") {
+                                setCreatingInStage(null);
+                                setNewTaskTitle("");
+                                setNewTaskType("standard");
+                                setNewTaskAssignee("");
+                              }
+                            }}
+                            autoFocus
+                          />
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              {/* Task Type Toggle */}
+                              <Popover>
+                                <PopoverTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className={cn(
+                                      "h-7 w-7 p-0 rounded-full",
+                                      newTaskType === "data-collection"
+                                        ? "text-blue-600 bg-blue-50"
+                                        : "text-muted-foreground"
+                                    )}
+                                    title={
+                                      newTaskType === "standard"
+                                        ? "Standard Task"
+                                        : "Data Collection Task"
+                                    }
+                                  >
+                                    {newTaskType === "standard" ? (
+                                      <FileText size={14} />
+                                    ) : (
+                                      <FileSpreadsheet size={14} />
+                                    )}
+                                  </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="p-0 w-48" align="start">
+                                  <div className="flex flex-col p-1">
+                                    <button
+                                      className={cn(
+                                        "flex items-center gap-2 px-2 py-1.5 text-sm rounded-sm hover:bg-accent transition-colors",
+                                        newTaskType === "standard" &&
+                                          "bg-accent text-accent-foreground"
+                                      )}
+                                      onClick={() => setNewTaskType("standard")}
+                                    >
+                                      <FileText
+                                        size={14}
+                                        className="text-muted-foreground"
+                                      />
+                                      <span>Standard Task</span>
+                                    </button>
+                                    <button
+                                      className={cn(
+                                        "flex items-center gap-2 px-2 py-1.5 text-sm rounded-sm hover:bg-accent transition-colors",
+                                        newTaskType === "data-collection" &&
+                                          "bg-accent text-accent-foreground"
+                                      )}
+                                      onClick={() =>
+                                        setNewTaskType("data-collection")
+                                      }
+                                    >
+                                      <FileSpreadsheet
+                                        size={14}
+                                        className="text-blue-500"
+                                      />
+                                      <span>Data Collection</span>
+                                    </button>
+                                  </div>
+                                </PopoverContent>
+                              </Popover>
+
+                              {/* Assignee Selector */}
+                              <Popover>
+                                <PopoverTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-7 w-7 p-0 rounded-full"
+                                    title="Assign to..."
+                                  >
+                                    {newTaskAssignee ? (
+                                      <Avatar className="h-6 w-6">
+                                        <AvatarImage
+                                          src={
+                                            users.find(
+                                              (u) => u.id === newTaskAssignee
+                                            )?.avatar
+                                          }
+                                        />
+                                        <AvatarFallback className="text-[10px]">
+                                          {users
+                                            .find(
+                                              (u) => u.id === newTaskAssignee
+                                            )
+                                            ?.name.substring(0, 2)
+                                            .toUpperCase()}
+                                        </AvatarFallback>
+                                      </Avatar>
+                                    ) : (
+                                      <div className="h-6 w-6 rounded-full border border-dashed flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-solid transition-colors">
+                                        <UserIcon size={12} />
+                                      </div>
+                                    )}
+                                  </Button>
+                                </PopoverTrigger>
+                                <PopoverContent
+                                  className="p-0 w-[200px]"
+                                  align="start"
+                                >
+                                  <Command>
+                                    <CommandInput placeholder="Assign to..." />
+                                    <CommandList>
+                                      <CommandEmpty>No users found.</CommandEmpty>
+                                      <CommandGroup heading="Team Members">
+                                        <CommandItem
+                                          onSelect={() => setNewTaskAssignee("")}
+                                          className="gap-2"
+                                        >
+                                          <div className="h-6 w-6 rounded-full border border-dashed flex items-center justify-center">
+                                            <UserIcon
+                                              size={12}
+                                              className="text-muted-foreground"
+                                            />
+                                          </div>
+                                          <span>Unassigned</span>
+                                          {newTaskAssignee === "" && (
+                                            <Check size={14} className="ml-auto" />
+                                          )}
+                                        </CommandItem>
+                                        {(selectedBoard?.teamMembers || [])
+                                          .map((m) =>
+                                            users.find((u) => u.id === m.userId)
+                                          )
+                                          .filter(Boolean)
+                                          .map((user) => (
+                                            <CommandItem
+                                              key={user!.id}
+                                              onSelect={() =>
+                                                setNewTaskAssignee(user!.id)
+                                              }
+                                              className="gap-2"
+                                            >
+                                              <Avatar className="h-6 w-6">
+                                                <AvatarImage src={user!.avatar} />
+                                                <AvatarFallback className="text-[10px]">
+                                                  {user!.name
+                                                    .substring(0, 2)
+                                                    .toUpperCase()}
+                                                </AvatarFallback>
+                                              </Avatar>
+                                              <span className="truncate">
+                                                {user!.name}
+                                              </span>
+                                              {newTaskAssignee === user!.id && (
+                                                <Check
+                                                  size={14}
+                                                  className="ml-auto"
+                                                />
+                                              )}
+                                            </CommandItem>
+                                          ))}
+                                      </CommandGroup>
+                                    </CommandList>
+                                  </Command>
+                                </PopoverContent>
+                              </Popover>
+                            </div>
+
+                            <div className="flex gap-2">
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => {
+                                  setCreatingInStage(null);
+                                  setNewTaskTitle("");
+                                  setNewTaskType("standard");
+                                  setNewTaskAssignee("");
+                                }}
+                                className="h-7 text-xs"
+                              >
+                                Cancel
+                              </Button>
+                              <Button
+                                size="sm"
+                                onClick={() => handleCreateInlineTask(stage.id)}
+                                disabled={!newTaskTitle.trim()}
+                                className="h-7 text-xs bg-primary hover:bg-primary/90"
+                              >
+                                Create
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <Button
+                          variant="ghost"
+                          className="w-full justify-start gap-2 text-muted-foreground hover:text-foreground h-9 font-medium group"
+                          onClick={() => {
+                            setCreatingInStage(stage.id);
+                            setNewTaskTitle("");
+                          }}
+                        >
+                          <Plus
+                            size={14}
+                            className="group-hover:bg-accent group-hover:text-accent-foreground rounded-sm transition-colors"
+                          />
+                          <span className="text-xs">Create issue</span>
+                        </Button>
                       )}
                     </div>
                   </motion.div>
