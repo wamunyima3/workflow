@@ -58,6 +58,7 @@ export function TaskDetailDialog() {
     selectTask,
     acknowledgeHelpRequest,
     resolveHelpRequest,
+    createHelpRequest,
     users,
     boards,
     updateTask,
@@ -81,6 +82,10 @@ export function TaskDetailDialog() {
   >("medium");
   const [formFields, setFormFields] = useState<DataCollectionField[]>([]);
   const fieldRefs = useRef<(HTMLInputElement | null)[]>([]);
+  
+  // Help request states
+  const [isCreatingHelp, setIsCreatingHelp] = useState(false);
+  const [helpMessage, setHelpMessage] = useState("");
 
   // Update refs array when fields change
   useEffect(() => {
@@ -206,6 +211,13 @@ export function TaskDetailDialog() {
   const cancelFormEdit = () => {
     setEditingForm(false);
     setFormFields([]);
+  };
+
+  const handleCreateHelpRequest = () => {
+    if (!helpMessage.trim()) return;
+    createHelpRequest(task.id, helpMessage.trim());
+    setHelpMessage("");
+    setIsCreatingHelp(false);
   };
 
   return (
@@ -849,50 +861,96 @@ export function TaskDetailDialog() {
                       task.editHistory
                         .slice()
                         .reverse()
-                        .map((entry) => (
-                          <div key={entry.id} className="relative">
-                            <div className="absolute -left-[41px] top-1 w-6 h-6 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-400 z-10 shadow-sm">
-                              <Clock size={12} />
-                            </div>
-                            <div>
-                              <div className="flex items-center gap-2 mb-1">
-                                <span className="text-sm font-bold text-slate-900">
-                                  {entry.userName}
-                                </span>
-                                <span className="text-[10px] font-medium text-slate-400">
-                                  {format(
-                                    new Date(entry.timestamp),
-                                    "MMM d, h:mm a"
-                                  )}
-                                </span>
+                        .map((entry) => {
+                          const getFieldDisplayValue = (field: string, value: unknown) => {
+                            if (value === null || value === undefined || value === "") return "None";
+                            
+                            if (field === "assignedTo") {
+                              const user = users.find((u) => u.id === value);
+                              return user ? user.name : "Unassigned";
+                            }
+                            
+                            if (field === "status") {
+                              const stage = board?.stages.find((s) => s.id === value);
+                              return stage ? stage.name : String(value);
+                            }
+                            
+                            if (field === "priority") {
+                              return String(value).toUpperCase();
+                            }
+                            
+                            if (typeof value === "boolean") {
+                              return value ? "Complete" : "Incomplete";
+                            }
+                            
+                            if (typeof value === "object") {
+                              if (Array.isArray(value)) {
+                                return `${value.length} field${value.length !== 1 ? 's' : ''}`;
+                              }
+                              return "Updated";
+                            }
+                            
+                            return String(value);
+                          };
+
+                          const getFieldName = (field: string) => {
+                            const fieldMap: Record<string, string> = {
+                              assignedTo: "Assigned To",
+                              title: "Title",
+                              description: "Description",
+                              priority: "Priority",
+                              status: "Stage",
+                              isFormComplete: "Form Status",
+                              dataCollectionFields: "Form Fields",
+                            };
+                            return fieldMap[field] || field;
+                          };
+
+                          return (
+                            <div key={entry.id} className="relative">
+                              <div className="absolute -left-[41px] top-1 w-6 h-6 rounded-full bg-white border border-border flex items-center justify-center text-muted-foreground z-10 shadow-sm">
+                                <Clock size={12} />
                               </div>
-                              <div className="bg-slate-50 rounded-lg p-3 border border-slate-100 space-y-2">
-                                {entry.changes.map((change, i) => (
-                                  <div key={i} className="text-xs">
-                                    <span className="font-medium">
-                                      Modified{" "}
-                                    </span>
-                                    <span className="font-bold text-slate-700">
-                                      {change.field.split(".").pop()}
-                                    </span>
-                                    <div className="mt-1 flex items-center gap-2 text-[10px]">
-                                      <span className="px-1.5 py-0.5 rounded bg-red-50 text-red-500 line-through">
-                                        {String(change.oldValue || "none")}
+                              <div>
+                                <div className="flex items-center gap-2 mb-1">
+                                  <span className="text-sm font-bold text-foreground">
+                                    {entry.userName}
+                                  </span>
+                                  <span className="text-[10px] font-medium text-muted-foreground">
+                                    {format(
+                                      new Date(entry.timestamp),
+                                      "MMM d, h:mm a"
+                                    )}
+                                  </span>
+                                </div>
+                                <div className="bg-muted/30 rounded-lg p-3 border space-y-2">
+                                  {entry.changes.map((change, i) => (
+                                    <div key={i} className="text-xs">
+                                      <span className="font-medium text-muted-foreground">
+                                        Modified{" "}
                                       </span>
-                                      <ChevronLeft
-                                        size={10}
-                                        className="text-slate-300 rotate-180"
-                                      />
-                                      <span className="px-1.5 py-0.5 rounded bg-green-50 text-green-600 font-bold">
-                                        {String(change.newValue || "none")}
+                                      <span className="font-bold text-foreground">
+                                        {getFieldName(change.field)}
                                       </span>
+                                      <div className="mt-1 flex items-center gap-2 text-[10px]">
+                                        <span className="px-1.5 py-0.5 rounded bg-red-50 text-red-600 line-through">
+                                          {getFieldDisplayValue(change.field, change.oldValue)}
+                                        </span>
+                                        <ChevronLeft
+                                          size={10}
+                                          className="text-muted-foreground rotate-180"
+                                        />
+                                        <span className="px-1.5 py-0.5 rounded bg-green-50 text-green-600 font-bold">
+                                          {getFieldDisplayValue(change.field, change.newValue)}
+                                        </span>
+                                      </div>
                                     </div>
-                                  </div>
-                                ))}
+                                  ))}
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        ))
+                          );
+                        })
                     ) : (
                       <div className="text-center py-12 text-slate-400">
                         <p className="text-xs font-bold uppercase tracking-widest">
@@ -908,6 +966,65 @@ export function TaskDetailDialog() {
             <TabsContent value="help" className="mt-0 h-full">
               <ScrollArea className="h-full">
                 <div className="p-8 space-y-6">
+                  {/* Help Request Action */}
+                  <div className="flex flex-col gap-4">
+                     {!isCreatingHelp ? (
+                        <div className="flex justify-end">
+                           <Button 
+                              onClick={() => setIsCreatingHelp(true)}
+                              className="bg-orange-500 hover:bg-orange-600 text-white font-bold"
+                           >
+                              <HelpCircle className="mr-2" size={16} />
+                              Request Help
+                           </Button>
+                        </div>
+                     ) : (
+                        <div className="bg-orange-50 rounded-xl p-4 border border-orange-100 space-y-3">
+                           <div className="flex justify-between items-center">
+                              <h4 className="text-sm font-bold text-orange-800">New Help Request</h4>
+                              <Button
+                                 variant="ghost"
+                                 size="sm"
+                                 onClick={() => {
+                                    setIsCreatingHelp(false);
+                                    setHelpMessage("");
+                                 }}
+                                 className="h-6 w-6 p-0 text-orange-400 hover:text-orange-600 hover:bg-orange-100"
+                              >
+                                 <X size={14} />
+                              </Button>
+                           </div>
+                           <Textarea
+                              value={helpMessage}
+                              onChange={(e) => setHelpMessage(e.target.value)}
+                              placeholder="Describe what you need help with..."
+                              className="bg-white border-orange-200 focus-visible:ring-orange-500 min-h-[100px]"
+                           />
+                           <div className="flex justify-end gap-2">
+                              <Button
+                                 variant="ghost"
+                                 size="sm"
+                                 onClick={() => {
+                                    setIsCreatingHelp(false);
+                                    setHelpMessage("");
+                                 }}
+                                 className="text-orange-600 hover:bg-orange-100 hover:text-orange-700"
+                              >
+                                 Cancel
+                              </Button>
+                              <Button
+                                 size="sm"
+                                 onClick={handleCreateHelpRequest}
+                                 disabled={!helpMessage.trim()}
+                                 className="bg-orange-500 hover:bg-orange-600 text-white font-bold"
+                              >
+                                 Submit Request
+                              </Button>
+                           </div>
+                        </div>
+                     )}
+                  </div>
+
                   {task.helpRequests.length > 0 ? (
                     task.helpRequests.map((request) => (
                       <div
