@@ -20,6 +20,8 @@ import {
 import { motion } from "framer-motion";
 import { CreateTaskDialog } from "@/components/create-task-dialog";
 import { DataCollectionForm } from "@/components/data-collection-form";
+import { TaskCard } from "@/components/task-card";
+import { getGreeting } from "@/lib/context-tracker";
 
 export function ExecutorView() {
   const {
@@ -43,6 +45,15 @@ export function ExecutorView() {
 
   const assignedTasks = tasks.filter((t) => t.assignedTo === currentUser?.id);
   const hasBoards = boards.length > 0;
+  
+  // Find resumable tasks (with draft data or incomplete forms)
+  const resumableTasks = tasks.filter((t) => {
+    return (
+      t.assignedTo === currentUser?.id &&
+      ((t.draftData && Object.keys(t.draftData).length > 0) ||
+        (t.type === "data-collection" && !t.isFormComplete))
+    );
+  });
 
   const getTaskBoard = (boardId: string) =>
     boards.find((b) => b.id === boardId);
@@ -93,10 +104,10 @@ export function ExecutorView() {
         <div className="px-8 py-6 border-b border-border bg-card/50 backdrop-blur-sm">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-foreground tracking-tight">
-                {isOverseer ? "All Tasks" : "My Work Queue"}
+              <h1 className="text-2xl font-bold text-foreground tracking-tight mb-1">
+                {isOverseer ? "All Tasks" : getGreeting(currentUser?.name)}
               </h1>
-              <p className="text-sm text-muted-foreground font-medium mt-1">
+              <p className="text-sm text-muted-foreground font-medium">
                 {isOverseer
                   ? `${myTasks.length} total tasks • Overseer View`
                   : `${assignedTasks.length} assigned tasks • Executor View`}
@@ -118,8 +129,9 @@ export function ExecutorView() {
           <div className="p-8">
             {myTasks.length === 0 ? (
               <div className="flex flex-col items-center justify-center text-center py-20">
-                <div className="w-20 h-20 rounded-2xl bg-accent flex items-center justify-center mb-6 text-muted-foreground">
-                  <Layout size={40} />
+                <div className="w-24 h-24 rounded-2xl bg-gradient-primary opacity-10 flex items-center justify-center mb-6 text-muted-foreground relative">
+                  <div className="absolute inset-0 bg-gradient-primary opacity-20 blur-xl"></div>
+                  <Layout size={48} className="relative z-10 text-primary" />
                 </div>
                 <h2 className="text-xl font-bold text-foreground mb-2">
                   {isOverseer
@@ -134,7 +146,7 @@ export function ExecutorView() {
                 {isOverseer && hasBoards && (
                   <Button
                     onClick={() => setCreateTaskOpen(true)}
-                    className="bg-primary hover:bg-primary/90"
+                    className="bg-primary hover:bg-primary/90 shadow-primary"
                   >
                     <Plus size={16} className="mr-2" />
                     Create First Task
@@ -142,101 +154,83 @@ export function ExecutorView() {
                 )}
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {myTasks.map((t) => {
-                  const stage = getTaskStage(t);
-                  const board = getTaskBoard(t.boardId);
-                  const priorityInfo = TASK_PRIORITIES.find(
-                    (p) => p.value === t.priority
-                  );
+              <div className="space-y-8">
+                {/* Continue Where You Left Off - only for executors */}
+                {!isOverseer && resumableTasks.length > 0 && (
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-3">
+                      <div className="h-px flex-1 bg-gradient-to-r from-transparent via-border to-transparent" />
+                      <h2 className="text-sm font-bold uppercase tracking-wider text-foreground flex items-center gap-2">
+                        <Clock className="text-primary" size={16} />
+                        Continue Where You Left Off
+                      </h2>
+                      <div className="h-px flex-1 bg-gradient-to-r from-transparent via-border to-transparent" />
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {resumableTasks.slice(0, 3).map((t) => {
+                        const stage = getTaskStage(t);
+                        const board = getTaskBoard(t.boardId);
+                        const priorityInfo = TASK_PRIORITIES.find(
+                          (p) => p.value === t.priority
+                        );
 
-                  const hasHelpRequest = t.helpRequests.some(
-                    (r) => r.status === "pending"
-                  );
-                  const isDataCollection = t.type === "data-collection";
-                  const hasIncompleteForm =
-                    isDataCollection && !t.isFormComplete;
-
-                  return (
-                    <motion.div
-                      key={t.id}
-                      whileHover={{ y: -4, scale: 1.02 }}
-                      transition={{ duration: 0.2 }}
-                      onClick={() => selectTask(t.id)}
-                      className="bg-card p-5 rounded-xl border border-border shadow-lg cursor-pointer text-left group transition-all hover:border-primary/50 hover:shadow-xl hover:shadow-primary/10"
-                    >
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <Badge
-                            className={cn(
-                              "text-[10px] font-bold uppercase px-2 py-0.5",
-                              t.priority === "critical" &&
-                                "bg-red-500/10 text-red-500 border-red-500/20",
-                              t.priority === "high" &&
-                                "bg-orange-500/10 text-orange-500 border-orange-500/20",
-                              t.priority === "medium" &&
-                                "bg-blue-500/10 text-blue-500 border-blue-500/20",
-                              t.priority === "low" &&
-                                "bg-slate-500/10 text-slate-500 border-slate-500/20"
-                            )}
-                            variant="outline"
+                        return (
+                          <motion.div
+                            key={t.id}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.3 }}
+                            onClick={() => selectTask(t.id)}
+                            className="relative"
                           >
-                            {t.priority}
-                          </Badge>
-                          {hasIncompleteForm && (
-                            <Badge
-                              variant="outline"
-                              className="text-[10px] font-bold bg-orange-500/10 text-orange-500 border-orange-500/20 animate-pulse"
-                            >
-                              <FileText size={10} className="mr-1" />
-                              FORM
-                            </Badge>
-                          )}
-                          {hasHelpRequest && (
-                            <Badge
-                              variant="outline"
-                              className="text-[10px] font-bold bg-red-500/10 text-red-500 border-red-500/20 animate-pulse"
-                            >
-                              <AlertTriangle size={10} className="mr-1" />
-                              HELP
-                            </Badge>
-                          )}
-                        </div>
-                        {stage && (
-                          <Badge
-                            variant="outline"
-                            className={cn(
-                              "text-[10px] font-bold border-border/50",
-                              stage.color
-                            )}
-                          >
-                            {stage.name}
-                          </Badge>
-                        )}
-                      </div>
+                            <div className="absolute -inset-0.5 bg-gradient-primary opacity-20 blur rounded-xl"></div>
+                            <TaskCard task={t} onClick={(t) => selectTask(t.id)} />
+                          </motion.div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
 
-                      <h3 className="text-sm font-bold text-foreground mb-2 group-hover:text-primary line-clamp-2 transition-colors">
-                        {t.title}
-                      </h3>
-                      <p className="text-xs text-muted-foreground line-clamp-2 mb-4">
-                        {t.description}
-                      </p>
+                {/* All Tasks */}
+                <div className="space-y-4">
+                  {(!isOverseer && resumableTasks.length > 0) && (
+                    <div className="flex items-center gap-3">
+                      <div className="h-px flex-1 bg-gradient-to-r from-transparent via-border to-transparent" />
+                      <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
+                        All Your Tasks
+                      </h2>
+                      <div className="h-px flex-1 bg-gradient-to-r from-transparent via-border to-transparent" />
+                    </div>
+                  )}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {myTasks.map((t, idx) => {
+                      const stage = getTaskStage(t);
+                      const board = getTaskBoard(t.boardId);
+                      const priorityInfo = TASK_PRIORITIES.find(
+                        (p) => p.value === t.priority
+                      );
 
-                      <div className="flex items-center justify-between pt-3 border-t border-border/50">
-                        <div className="text-[10px] text-muted-foreground font-medium flex items-center gap-1">
-                          <Clock size={10} />
-                          {board?.name}
-                        </div>
-                        {t.isFormComplete && (
-                          <div className="text-[10px] text-green-500 font-bold flex items-center gap-1">
-                            <CheckCircle2 size={10} />
-                            COMPLETE
-                          </div>
-                        )}
-                      </div>
-                    </motion.div>
-                  );
-                })}
+                      const hasHelpRequest = t.helpRequests.some(
+                        (r) => r.status === "pending"
+                      );
+                      const isDataCollection = t.type === "data-collection";
+                      const hasIncompleteForm =
+                        isDataCollection && !t.isFormComplete;
+
+                      return (
+                        <motion.div
+                          key={t.id}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.3, delay: idx * 0.05 }}
+                        >
+                          <TaskCard task={t} onClick={(t) => selectTask(t.id)} />
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
             )}
           </div>
