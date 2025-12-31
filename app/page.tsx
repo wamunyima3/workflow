@@ -8,7 +8,9 @@ import { BoardView } from "@/components/boardview";
 import { ExecutorView } from "@/components/executor-view";
 import { TaskDetailDialog } from "@/components/task-detail-dialog";
 import { motion, AnimatePresence } from "framer-motion";
-import { Layers } from "lucide-react";
+import { Layers, Plus } from "lucide-react";
+import { CreateBoardDialog } from "@/components/create-board-dialog";
+import { Button } from "@/components/ui/button";
 
 export default function App() {
   const {
@@ -25,6 +27,7 @@ export default function App() {
   } = useStore();
   const [isInitialized, setIsInitialized] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [createBoardOpen, setCreateBoardOpen] = useState(false);
 
   // Wait for store to hydrate from localStorage before initializing
   useEffect(() => {
@@ -278,12 +281,24 @@ export default function App() {
                       Select a board from the sidebar or create a new one to
                       start managing your workflow with precision and clarity.
                     </p>
+                    <Button 
+                      size="lg" 
+                      className="gap-2 font-bold shadow-primary text-base px-8"
+                      onClick={() => setCreateBoardOpen(true)}
+                    >
+                      <Plus size={20} />
+                      Create New Board
+                    </Button>
                   </div>
                 </div>
               )}
             </motion.div>
           </AnimatePresence>
           <TaskDetailDialog />
+          <CreateBoardDialog 
+            open={createBoardOpen} 
+            onOpenChange={setCreateBoardOpen} 
+          />
         </main>
       </div>
     </div>

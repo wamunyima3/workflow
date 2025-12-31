@@ -11,7 +11,7 @@ export default function Loading() {
       </div>
       <div className="mt-8 space-y-2 text-center">
         <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500 animate-pulse">
-          Workflow Pro
+          Workflow
         </h2>
         <div className="flex items-center gap-1 justify-center">
           <div className="h-1.5 w-1.5 rounded-full bg-primary animate-bounce [animation-delay:-0.3s]" />
