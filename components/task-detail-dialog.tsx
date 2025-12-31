@@ -228,7 +228,7 @@ export function TaskDetailDialog() {
         className="w-full max-w-4xl h-[90vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden border bg-card"
       >
         {/* Header Section */}
-        <header className="px-8 py-6 border-b bg-card flex items-start justify-between">
+        <header className="px-4 sm:px-8 py-4 sm:py-6 border-b bg-card flex items-start justify-between">
           <div className="space-y-1 flex-1">
             <div className="flex items-center gap-3">
               <StatusSignal
@@ -276,7 +276,7 @@ export function TaskDetailDialog() {
                 )}
                 onClick={startEditingTitle}
               >
-                <h2 className="text-2xl font-bold text-foreground tracking-tight">
+                <h2 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight">
                   {task.title}
                 </h2>
                 {overseer && (
@@ -395,7 +395,7 @@ export function TaskDetailDialog() {
 
         {/* Content Section */}
         <Tabs defaultValue="details" className="flex-1 flex flex-col min-h-0">
-          <div className="px-8 py-2 border-b bg-muted/20">
+          <div className="px-4 sm:px-8 py-2 border-b bg-muted/20">
             <TabsList className="bg-muted/50 rounded-lg p-1 h-auto gap-1">
               <TabsTrigger
                 value="details"
@@ -442,7 +442,7 @@ export function TaskDetailDialog() {
           <div className="flex-1 min-h-0">
             <TabsContent value="details" className="mt-0 h-full">
               <ScrollArea className="h-full">
-                <div className="p-8 space-y-8">
+                <div className="p-4 sm:p-8 space-y-8">
                   {task.type === "data-collection" && (
                     <div className="mb-8">
                       <div className="flex items-center justify-between mb-3">

@@ -487,7 +487,7 @@ export function BoardView() {
 
         <div className="flex-1 min-h-0 overflow-hidden">
           <ScrollArea className="h-full w-full">
-            <div className="p-4 sm:p-6 lg:p-8 flex gap-4 sm:gap-6 min-w-max">
+            <div className="p-4 sm:p-6 lg:p-8 flex gap-4 sm:gap-6 min-w-max snap-x snap-mandatory">
               {selectedBoard.stages.map((stage, stageIndex) => {
                 const stageTasks = filteredBoardTasks.filter(
                   (t) => t.status === stage.id
@@ -499,7 +499,7 @@ export function BoardView() {
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: stageIndex * 0.1 }}
-                    className="flex flex-col gap-3 sm:gap-4 w-full sm:w-[280px] lg:w-[340px] shrink-0"
+                    className="flex flex-col gap-3 sm:gap-4 w-[85vw] sm:w-[280px] lg:w-[340px] shrink-0 snap-center"
                     onDragOver={handleDragOver}
                     onDrop={(e) => handleDrop(e, stage.id)}
                   >
