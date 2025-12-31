@@ -79,9 +79,9 @@ export const USER_ROLES = {
 
 // Status signal color mappings for visual hierarchy (pulse indicators)
 export const STATUS_SIGNAL_COLORS = {
-  default: "#94a3b8" as string, // slate-400
-  blocked: "#f59e0b" as string, // orange-500
-  complete: "#10b981" as string, // green-500
-  critical: "#ef4444" as string, // red-500
-  inProgress: "#3b82f6" as string, // blue-500
+  default: "bg-slate-400 shadow-[0_0_10px_rgba(148,163,184,0.4)]", // slate-400
+  blocked: "bg-orange-500 shadow-[0_0_10px_rgba(249,115,22,0.4)]", // orange-500
+  complete: "bg-green-500 shadow-[0_0_10px_rgba(16,185,129,0.4)]", // green-500
+  critical: "bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.4)]", // red-500
+  inProgress: "bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.4)]", // blue-500
 } as const;

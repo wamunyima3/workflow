@@ -50,15 +50,15 @@ export function TaskCard({ task, onClick }: TaskCardProps) {
         className={cn(
           "bg-card border-border shadow-md transition-all py-4 relative overflow-hidden",
           "hover:shadow-2xl hover:border-primary/50",
-          task.priority === "critical" && "border-l-4 border-l-red-500 pulse-glow-critical",
-          task.priority === "high" && "border-l-4 border-l-orange-500 shadow-warning",
+          task.priority === "critical" && "border-l-4 border-l-red-500 hover:shadow-red-500/20",
+          task.priority === "high" && "border-l-4 border-l-orange-500 hover:shadow-orange-500/20",
           task.priority === "medium" && "border-l-4 border-l-blue-500",
           task.priority === "low" && "border-l-4 border-l-slate-400",
         )}
       >
-        {/* Premium gradient overlay */}
+        {/* Premium gradient overlay - reduced opacity */}
         <div className={cn(
-          "absolute inset-0 bg-gradient-to-br opacity-50 pointer-events-none",
+          "absolute inset-0 bg-gradient-to-br opacity-30 pointer-events-none group-hover:opacity-50 transition-opacity duration-500",
           priorityGradients[task.priority as keyof typeof priorityGradients]
         )} />
         

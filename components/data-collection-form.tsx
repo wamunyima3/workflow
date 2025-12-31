@@ -92,14 +92,14 @@ export function DataCollectionForm({ task, readOnly = false, allowComplete = fal
                         value={(formData[field.id] as string) || ""}
                         onChange={(e) => handleChange(field.id, e.target.value)}
                         placeholder={field.placeholder || `Enter ${field.label.toLowerCase()}...`}
-                        className="min-h-[120px] bg-accent/30 border-border focus-visible:ring-primary"
+                        className="min-h-[120px]"
                         disabled={readOnly || task.isFormComplete}
                     />
                 ) : field.type === "select" ? (
                     <select
                         value={(formData[field.id] as string) || ""}
                         onChange={(e) => handleChange(field.id, e.target.value)}
-                        className="w-full h-11 px-3 py-2 bg-accent/30 border border-border rounded-md focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-50"
+                        className="w-full h-11 px-3 py-2 bg-background border border-input rounded-md ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                         disabled={readOnly || task.isFormComplete}
                     >
                       <option value="">Select {field.label.toLowerCase()}...</option>
@@ -115,7 +115,7 @@ export function DataCollectionForm({ task, readOnly = false, allowComplete = fal
                         value={(formData[field.id] as string) || ""}
                         onChange={(e) => handleChange(field.id, e.target.value)}
                         placeholder={field.placeholder || `Enter ${field.label.toLowerCase()}...`}
-                        className="bg-accent/30 border-border h-11 focus-visible:ring-primary"
+                        className="h-11"
                         disabled={readOnly || task.isFormComplete}
                     />
                 )}

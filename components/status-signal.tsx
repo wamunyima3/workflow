@@ -11,7 +11,7 @@ interface StatusSignalProps {
 
 export function StatusSignal({ status, priority, className, size = "md" }: StatusSignalProps) {
   // Determine color based on priority or status
-  let color = STATUS_SIGNAL_COLORS.default
+  let color: string = STATUS_SIGNAL_COLORS.default
 
   if (status === "blocked") color = STATUS_SIGNAL_COLORS.blocked
   else if (status === "complete") color = STATUS_SIGNAL_COLORS.complete
@@ -27,11 +27,11 @@ export function StatusSignal({ status, priority, className, size = "md" }: Statu
   return (
     <div className={cn("flex items-center gap-2", className)}>
       <div
-        className={cn("rounded-full animate-pulse shadow-[0_0_8px_rgba(0,0,0,0.1)]", sizeClasses[size])}
-        style={{
-          backgroundColor: color,
-          boxShadow: `0 0 10px ${color}40`,
-        }}
+        className={cn(
+          "rounded-full animate-pulse", 
+          sizeClasses[size],
+          color
+        )}
       />
     </div>
   )
